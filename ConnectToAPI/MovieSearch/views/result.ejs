@@ -1,0 +1,11 @@
+<h1> Movie Search Results</h1>
+<ul>
+<% moviesDetail.forEach(function(movie){ %>
+    <li><%= movie.Title%>  -  (<%= movie.Year%>)</li>
+<% }) %>
+</ul>
+<a href="/">Search Again</a>
+<p/>
+<% moviesDetail.forEach(function(movie){ %>
+    <img src=<%=movie.Poster%>>
+<% }) %>

@@ -1,0 +1,13 @@
+<% include partials/header %>
+<h2> Sounds of Animals </h2>
+
+<p> <h3>Sound of <%= animal %> is <%= sound %></h3> </p> 
+
+<% if (animal === "cow") {%>
+<p> Animal you selected is COW</p>
+<%} else {%>
+    <p>You selected some other animal</p>
+    <%}%>
+
+
+    <% include partials/footer %>
