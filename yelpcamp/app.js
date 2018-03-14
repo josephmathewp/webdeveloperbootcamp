@@ -2,30 +2,34 @@ var express = require("express");
 var app = express();
 var request = require("request");
 var bodyparser = require("body-parser")
+var mongoose = require("mongoose");
 
+mongoose.connect("mongodb://localhost/yelpcamp")
 app.set("view engine", "ejs");
 app.use(bodyparser.urlencoded({extended: true}));
 app.get("/", function(req, res){
     res.render("landing");
 });
 
-var campgrounds=[
-    {name:"Salmon Creek", image:"https://tse1.mm.bing.net/th?id=OIP.IBe-7MYwIlDYvcKKQ3FrCQHaE8&w=260&h=174&c=7&o=5&pid=1.7"},
-    {name:"Granite Hill", image:"http://www.chamberofthenorthcountry.com/uploads/2/4/8/3/24836756/433177_orig.jpg"},
-    {name:"Mountain Goats Rest", image:"http://www.enota.com/tentstream.JPG"},
-    {name:"Salmon Creek", image:"https://tse1.mm.bing.net/th?id=OIP.IBe-7MYwIlDYvcKKQ3FrCQHaE8&w=260&h=174&c=7&o=5&pid=1.7"},
-    {name:"Granite Hill", image:"http://www.chamberofthenorthcountry.com/uploads/2/4/8/3/24836756/433177_orig.jpg"},
-    {name:"Mountain Goats Rest", image:"http://www.enota.com/tentstream.JPG"},
-    {name:"Salmon Creek", image:"https://tse1.mm.bing.net/th?id=OIP.IBe-7MYwIlDYvcKKQ3FrCQHaE8&w=260&h=174&c=7&o=5&pid=1.7"},
-    {name:"Granite Hill", image:"http://www.chamberofthenorthcountry.com/uploads/2/4/8/3/24836756/433177_orig.jpg"},
-    {name:"Mountain Goats Rest", image:"http://www.enota.com/tentstream.JPG"},
-    {name:"Salmon Creek", image:"https://tse1.mm.bing.net/th?id=OIP.IBe-7MYwIlDYvcKKQ3FrCQHaE8&w=260&h=174&c=7&o=5&pid=1.7"},
-    {name:"Granite Hill", image:"http://www.chamberofthenorthcountry.com/uploads/2/4/8/3/24836756/433177_orig.jpg"},
-    {name:"Mountain Goats Rest", image:"http://www.enota.com/tentstream.JPG"},
-    {name:"Salmon Creek", image:"https://tse1.mm.bing.net/th?id=OIP.IBe-7MYwIlDYvcKKQ3FrCQHaE8&w=260&h=174&c=7&o=5&pid=1.7"},
-    {name:"Granite Hill", image:"http://www.chamberofthenorthcountry.com/uploads/2/4/8/3/24836756/433177_orig.jpg"},
-    {name:"Mountain Goats Rest", image:"http://www.enota.com/tentstream.JPG"}
-]
+var campgroundSchema = new mongoose.Schema({
+    name: String,
+    image: String,
+    description: String
+});
+
+var Campground = mongoose.model("Campground", campgroundSchema);
+
+app.get("/campgrounds", function(req, res){
+    Campground.find({}, function(err, allCampgrounds){
+        if(err) {
+            console.log(err);
+        }
+        else {
+            res.render("index", {campgrounds: allCampgrounds});
+        }
+    })
+});
+
 
 app.get("/campgrounds", function(req, res){
     res.render("campgrounds", {campgrounds: campgrounds});
@@ -35,15 +39,33 @@ app.get("/campgrounds/new", function(req, res){
     res.render("new.ejs");
 });
 
+app.get("/campgrounds/:id", function(req, res){
+    console.log(req.param.id);
+    var camp = Campground.findById(req.params.id, function(err, foundCampGround){
+        if(err){
+            console.log("ERROR");
+        }
+        else {
+            console.log(foundCampGround);
+            res.render("show", {campground: foundCampGround});
+        }
+    });
+    
+});
+
 app.post("/campgrounds",function(req, res){
     var name = req.body.name;
     var image = req.body.image;
-
-    var newCampGround = {name: name, image: image};
-
-    campgrounds.push(newCampGround);
-
-    res.redirect("/campgrounds");
+    var description = req.body.description;
+    var newCampGround = {name: name, image: image, description: description};
+    console.log(newCampGround);
+    Campground.create(newCampGround, function(err, campground){
+        if(err){
+            console.log("ERROR");
+        } else {
+            res.redirect("/campgrounds");
+        }
+    });
 });
 
 app.listen(3002, "127.0.0.1", function() {
